@@ -47,7 +47,7 @@ export default function Dashboard() {
     return localStorage.getItem("selectedOption") || null;
   });
 
-  const [preprompt, setPreprompt] = useState(() => {
+  const [preprompt] = useState(() => {
     return localStorage.getItem("preprompt") || "";
   });
 
