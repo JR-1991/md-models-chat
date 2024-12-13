@@ -32,7 +32,7 @@ export async function evaluateSchemaPrompt(
   apiKey: string
 ): Promise<EvaluateSchemaPromptResponse> {
   const baseUrl = getRemoteBaseUrl();
-  const response = await fetch(`${baseUrl}/api/evaluate`, {
+  const response = await fetch(`/api/evaluate`, {
     method: "POST",
     credentials: "include",
     body: JSON.stringify({
@@ -69,7 +69,7 @@ export async function createKnowledgeGraph(
   apiKey?: string
 ): Promise<KnowledgeGraph> {
   const baseUrl = getRemoteBaseUrl();
-  const response = await fetch(`${baseUrl}/api/graph`, {
+  const response = await fetch(`/api/graph`, {
     method: "POST",
     credentials: "include",
     body: JSON.stringify({
@@ -108,7 +108,7 @@ export async function extractToSchema(
   multipleOutputs: boolean = false
 ): Promise<Record<string, unknown>> {
   const baseUrl = getRemoteBaseUrl();
-  const response = await fetch(`${baseUrl}/api/extract`, {
+  const response = await fetch(`/api/extract`, {
     method: "POST",
     credentials: "include",
     body: JSON.stringify({
@@ -139,7 +139,7 @@ export async function extractToSchema(
  */
 export async function checkPassword(password: string): Promise<boolean> {
   const baseUrl = getRemoteBaseUrl();
-  const response = await fetch(`${baseUrl}/api/login?secret=${password}`, {
+  const response = await fetch(`/api/login?secret=${password}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -156,7 +156,7 @@ export async function checkPassword(password: string): Promise<boolean> {
  */
 export async function setJWTCookie() {
   const baseUrl = getRemoteBaseUrl();
-  const response = await fetch(`${baseUrl}/api/auth`, {
+  const response = await fetch(`/api/auth`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
