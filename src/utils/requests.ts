@@ -177,8 +177,8 @@ export async function setJWTCookie() {
 function getBaseUrl() {
   try {
     // First try to get VERCEL_URL
-    if (import.meta.env.VITE_VERCEL_URL) {
-      return import.meta.env.VITE_VERCEL_URL;
+    if (import.meta.env.VERCEL_URL) {
+      return import.meta.env.VERCEL_URL;
     }
     // Then try to get VITE_PUBLIC_BASE_URL
     if (import.meta.env.VITE_PUBLIC_BASE_URL) {
