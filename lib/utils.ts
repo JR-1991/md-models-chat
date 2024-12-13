@@ -58,7 +58,7 @@ export function convertKnowledgeGraphToTriplets(
  */
 export function getBaseUrl(): string {
   return (
-    process.env.VITE_VERCEL_URL ??
+    process.env.VERCEL_URL ??
     process.env.ALLOWED_ORIGIN ??
     "http://localhost:3000"
   );
