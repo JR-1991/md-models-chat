@@ -175,6 +175,7 @@ export async function setJWTCookie() {
  * @throws An error if retrieving the base URL fails.
  */
 function getRemoteBaseUrl() {
+  console.log("Importing env", import.meta.env);
   try {
     // First try to get VITE_VERCEL_URL
     if (import.meta.env.VITE_VERCEL_URL) {
