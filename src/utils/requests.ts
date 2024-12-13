@@ -177,10 +177,16 @@ export async function setJWTCookie() {
 function getRemoteBaseUrl() {
   console.log("Importing env", import.meta.env);
   try {
-    // First try to get VERCEL_URL
+    // First try to get VITE_VERCEL_BRANCH_URL
+    if (import.meta.env.VITE_VERCEL_BRANCH_URL) {
+      return import.meta.env.VITE_VERCEL_BRANCH_URL;
+    }
+
+    // Second try to get VERCEL_URL
     if (import.meta.env.VERCEL_URL) {
       return import.meta.env.VERCEL_URL;
     }
+
     // Then try to get VITE_PUBLIC_BASE_URL
     if (import.meta.env.VITE_PUBLIC_BASE_URL) {
       return import.meta.env.VITE_PUBLIC_BASE_URL;

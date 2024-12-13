@@ -94,6 +94,10 @@ export default function Dashboard() {
   }, [githubUrl]);
 
   useEffect(() => {
+    if (!path) {
+      return;
+    }
+
     fetchFromGitHub(githubUrl, path).then((data) => {
       const objects = getMdModelObjects(data);
       setOptions(objects);
