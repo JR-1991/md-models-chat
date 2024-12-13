@@ -45,7 +45,7 @@ MD-Models Chat is a web application designed to transform unstructured data into
    SECRET=<your-app-secret> # Optional
 
    # Vite environment variables
-   VITE_PUBLIC_USE_PASSWORD=false
+   VITE_USE_PASSWORD=false
    ```
 
 ### Environment Variables
