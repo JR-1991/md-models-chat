@@ -36,7 +36,10 @@ import { Viewer } from "@/components/viewer";
 import { KnowledgeGraph as KnowledgeGraphType } from "@/utils/requests";
 export default function Dashboard() {
   const [githubUrl, setGithubUrl] = useState(() => {
-    return localStorage.getItem("githubUrl") || "";
+    return (
+      localStorage.getItem("githubUrl") ||
+      "Strenda-biocatalysis/Strenda-biocatalysis"
+    );
   });
 
   const [path, setPath] = useState(() => {
