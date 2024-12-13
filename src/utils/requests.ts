@@ -175,6 +175,7 @@ export async function setJWTCookie() {
  * @throws An error if retrieving the base URL fails.
  */
 function getRemoteBaseUrl() {
+  console.log("Importing env", import.meta.env);
   try {
     // First try to get VERCEL_URL
     if (import.meta.env.VERCEL_URL) {
@@ -184,8 +185,6 @@ function getRemoteBaseUrl() {
     if (import.meta.env.VITE_PUBLIC_BASE_URL) {
       return import.meta.env.VITE_PUBLIC_BASE_URL;
     }
-    // Eventually fall back to localhost:3000
-    return "http://localhost:3000";
   } catch (error) {
     console.error("Failed to get base URL", error);
     throw error;

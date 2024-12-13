@@ -57,6 +57,7 @@ export function convertKnowledgeGraphToTriplets(
  * @returns The base URL for the application.
  */
 export function getBaseUrl(): string {
+  console.log("Importing env", process.env);
   return (
     process.env.VERCEL_URL ??
     process.env.ALLOWED_ORIGIN ??
