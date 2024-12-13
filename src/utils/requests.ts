@@ -31,7 +31,7 @@ export async function evaluateSchemaPrompt(
   schema: string,
   apiKey: string
 ): Promise<EvaluateSchemaPromptResponse> {
-  const baseUrl = getRemoteBaseUrl();
+  // const baseUrl = getRemoteBaseUrl();
   const response = await fetch(`/api/evaluate`, {
     method: "POST",
     credentials: "include",
@@ -68,7 +68,7 @@ export async function createKnowledgeGraph(
   prePrompt: string,
   apiKey?: string
 ): Promise<KnowledgeGraph> {
-  const baseUrl = getRemoteBaseUrl();
+  // const baseUrl = getRemoteBaseUrl();
   const response = await fetch(`/api/graph`, {
     method: "POST",
     credentials: "include",
@@ -107,7 +107,7 @@ export async function extractToSchema(
   apiKey?: string,
   multipleOutputs: boolean = false
 ): Promise<Record<string, unknown>> {
-  const baseUrl = getRemoteBaseUrl();
+  // const baseUrl = getRemoteBaseUrl();
   const response = await fetch(`/api/extract`, {
     method: "POST",
     credentials: "include",
@@ -138,7 +138,7 @@ export async function extractToSchema(
  * @returns A promise that resolves to a boolean indicating validity.
  */
 export async function checkPassword(password: string): Promise<boolean> {
-  const baseUrl = getRemoteBaseUrl();
+  // const baseUrl = getRemoteBaseUrl();
   const response = await fetch(`/api/login?secret=${password}`, {
     method: "POST",
     headers: {
@@ -155,7 +155,7 @@ export async function checkPassword(password: string): Promise<boolean> {
  * @throws An error if setting the JWT cookie fails.
  */
 export async function setJWTCookie() {
-  const baseUrl = getRemoteBaseUrl();
+  // const baseUrl = getRemoteBaseUrl();
   const response = await fetch(`/api/auth`, {
     method: "GET",
     headers: {
@@ -174,23 +174,23 @@ export async function setJWTCookie() {
  * @returns The base URL as a string.
  * @throws An error if retrieving the base URL fails.
  */
-function getRemoteBaseUrl() {
-  try {
-    if (import.meta.env.VITE_VERCEL_PROJECT_PRODUCTION_URL) {
-      return import.meta.env.VITE_VERCEL_PROJECT_PRODUCTION_URL;
-    }
+// function getRemoteBaseUrl() {
+//   try {
+//     if (import.meta.env.VITE_VERCEL_PROJECT_PRODUCTION_URL) {
+//       return import.meta.env.VITE_VERCEL_PROJECT_PRODUCTION_URL;
+//     }
 
-    // First try to get VITE_VERCEL_URL
-    if (import.meta.env.VITE_VERCEL_URL) {
-      return import.meta.env.VITE_VERCEL_URL;
-    }
+//     // First try to get VITE_VERCEL_URL
+//     if (import.meta.env.VITE_VERCEL_URL) {
+//       return import.meta.env.VITE_VERCEL_URL;
+//     }
 
-    // Then try to get VITE_PUBLIC_BASE_URL
-    if (import.meta.env.VITE_PUBLIC_BASE_URL) {
-      return import.meta.env.VITE_PUBLIC_BASE_URL;
-    }
-  } catch (error) {
-    console.error("Failed to get base URL", error);
-    throw error;
-  }
-}
+//     // Then try to get VITE_PUBLIC_BASE_URL
+//     if (import.meta.env.VITE_PUBLIC_BASE_URL) {
+//       return import.meta.env.VITE_PUBLIC_BASE_URL;
+//     }
+//   } catch (error) {
+//     console.error("Failed to get base URL", error);
+//     throw error;
+//   }
+// }
