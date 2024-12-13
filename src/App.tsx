@@ -8,6 +8,8 @@ function App() {
     setJWTCookie().then(() => console.log("JWT cookie set"));
   }, []);
 
+  console.log("Environment Variables:", import.meta.env);
+
   return (
     <>
       {import.meta.env.VITE_PUBLIC_USE_PASSWORD === "true" && <PasswordModal />}
