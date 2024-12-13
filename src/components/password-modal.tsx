@@ -5,8 +5,6 @@ import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { checkPassword } from "@/utils/requests";
 
-const CORRECT_PASSWORD = "secret123";
-
 export default function PasswordModal() {
   const [isOpen, setIsOpen] = useState(true);
   const [password, setPassword] = useState("");
