@@ -85,7 +85,7 @@ export function Viewer({
               : "opacity-0 absolute inset-0 pointer-events-none"
           )}
         >
-          {jsonData.length > 0 ? (
+          {jsonData !== "{}" ? (
             <SyntaxHighlighter
               language="json"
               style={{
@@ -113,7 +113,11 @@ export function Viewer({
             >
               {jsonData}
             </SyntaxHighlighter>
-          ) : !evaluation.fits ? null : (
+          ) : !evaluation.fits && jsonData === "{}" ? (
+            <div className="flex justify-center items-center h-40 text-gray-500">
+              <p>No Data</p>
+            </div>
+          ) : (
             <div className="flex justify-center items-center h-40">
               <Spinner color="secondary" />
             </div>
@@ -173,7 +177,9 @@ export function Viewer({
                 </ReactMarkdown>
               </>
             ) : (
-              <ReactMarkdown>No data provided.</ReactMarkdown>
+              <div className="flex justify-center items-center h-40 text-gray-500">
+                <p>No Data</p>
+              </div>
             )}
           </div>
         </div>
@@ -185,11 +191,17 @@ export function Viewer({
               : "opacity-0 absolute inset-0 pointer-events-none"
           )}
         >
-          {knowledgeGraph.triplets?.length > 0 ? (
-            <KnowledgeGraph knowledgeGraph={knowledgeGraph} />
+          {evaluation.reason || knowledgeGraph.triplets?.length > 0 ? (
+            knowledgeGraph.triplets?.length > 0 ? (
+              <KnowledgeGraph knowledgeGraph={knowledgeGraph} />
+            ) : (
+              <div className="flex justify-center items-center h-40">
+                <Spinner color="secondary" />
+              </div>
+            )
           ) : (
-            <div className="flex justify-center items-center h-40">
-              <Spinner color="secondary" />
+            <div className="flex justify-center items-center h-40 text-gray-500 text-sm">
+              <p>No Data</p>
             </div>
           )}
         </div>
