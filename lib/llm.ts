@@ -2,8 +2,11 @@ import OpenAI from "openai";
 import { z } from "zod";
 import zodToJsonSchema from "zod-to-json-schema";
 import { KnowledgeGraphSchema } from "./schemes";
-import { EvaluationSchema } from "./schemes";
-import { EVALUATION_PROMPT, KNOWLEDGE_GRAPH_PROMPT } from "./prompts";
+import {
+  EVALUATION_PROMPT,
+  EXTRACT_PROMPT,
+  KNOWLEDGE_GRAPH_PROMPT,
+} from "./prompts";
 import { convertKnowledgeGraphToTriplets } from "./utils";
 
 export interface ExtractionEvaluation {
@@ -11,13 +14,17 @@ export interface ExtractionEvaluation {
   reason: string;
 }
 
-const LLM_MODEL = process.env.LLM_MODEL ?? "gpt-4o";
-const DEFAULT_PRE_PROMPT = `You are a helpful assistant that understands JSON schemas. 
-  If you think the given text does not fit the schema, set the 'fits' 
-  property to false and leave the 'data' or 'items' property empty. Otherwise, 
-  set it to true and fill in the 'data' or 'items' property with the data that fits the schema.
-  
-  You are tasked to extract data from a given text. If something is not supplied directly, leave it empty.`;
+const SUPPORTED_PROVIDERS = ["openai", "ollama", "mistral"];
+const DEFAULT_PROVIDER = "openai";
+
+// Fallback model for all LLM calls
+const DEFAULT_LLM_MODEL = "gpt-4o";
+
+export enum SupportedProviders {
+  OpenAI = "openai",
+  Ollama = "ollama",
+  Mistral = "mistral",
+}
 
 /**
  * Extracts data from a given text based on a specified schema and knowledge graph.
@@ -41,7 +48,12 @@ export default async function extractToSchema(
     );
   }
 
-  const client = setupClient(apiKey);
+  const client = setupClient(
+    apiKey,
+    evaluateProvider(process.env.EXTRACT_PROVIDER)
+  );
+  const model = process.env.EXTRACT_LLM_MODEL ?? DEFAULT_LLM_MODEL;
+
   let schema_obj = JSON.parse(schema);
 
   if (multipleOutputs) {
@@ -65,10 +77,10 @@ export default async function extractToSchema(
   const prompt = convertKnowledgeGraphToTriplets(graph);
   const chatCompletion = await client.chat.completions.create({
     messages: [
-      { role: "system", content: DEFAULT_PRE_PROMPT },
+      { role: "system", content: EXTRACT_PROMPT },
       { role: "user", content: prompt },
     ],
-    model: LLM_MODEL,
+    model: model,
     temperature: 0,
     response_format: {
       type: "json_schema",
@@ -96,7 +108,12 @@ export async function evaluateSchemaPrompt(
   schema: string,
   apiKey: string
 ): Promise<ExtractionEvaluation> {
-  const client = setupClient(apiKey);
+  const client = setupClient(
+    apiKey,
+    evaluateProvider(process.env.EVAL_PROVIDER)
+  );
+  const model = process.env.EVAL_LLM_MODEL ?? DEFAULT_LLM_MODEL;
+
   const chatCompletion = await client.chat.completions.create({
     messages: [
       {
@@ -106,7 +123,7 @@ export async function evaluateSchemaPrompt(
       { role: "user", content: "Schema: \n" + schema },
       { role: "user", content: "Text: \n" + text },
     ],
-    model: LLM_MODEL,
+    model: model,
     temperature: 0,
   });
 
@@ -134,8 +151,12 @@ export async function createKnowledgeGraph(
   pre_prompt: string,
   apiKey: string
 ): Promise<typeof KnowledgeGraphSchema> {
-  const client = setupClient(apiKey);
+  const client = setupClient(
+    apiKey,
+    evaluateProvider(process.env.KNOWLEDGE_GRAPH_PROVIDER)
+  );
   const schema = zodToJsonSchema(KnowledgeGraphSchema, { target: "openAi" });
+  const model = process.env.KNOWLEDGE_GRAPH_LLM_MODEL ?? DEFAULT_LLM_MODEL;
 
   const chatCompletion = await client.chat.completions.create({
     messages: [
@@ -143,7 +164,7 @@ export async function createKnowledgeGraph(
       { role: "user", content: pre_prompt },
       { role: "user", content: prompt },
     ],
-    model: LLM_MODEL,
+    model: model,
     temperature: 0,
     response_format: {
       type: "json_schema",
@@ -164,15 +185,35 @@ export async function createKnowledgeGraph(
  * @param {string} apiKey - The API key for authentication.
  * @returns {OpenAI} - The configured OpenAI client.
  */
-function setupClient(apiKey: string) {
-  if (process.env.OLLAMA_URL) {
+function setupClient(apiKey: string, provider: SupportedProviders) {
+  if (provider !== SupportedProviders.OpenAI) {
+    if (!process.env.LLM_BASE_URL) {
+      throw new Error("LLM_BASE_URL is not set");
+    }
+
     return new OpenAI({
-      apiKey: apiKey,
-      baseURL: process.env.OLLAMA_URL,
+      apiKey: "some_key",
+      baseURL: process.env.LLM_BASE_URL,
     });
   }
 
   return new OpenAI({
     apiKey: apiKey,
   });
+}
+
+function evaluateProvider(provider: string | undefined): SupportedProviders {
+  if (provider === "openai" || !provider) {
+    return SupportedProviders.OpenAI;
+  }
+
+  if (
+    !Object.values(SupportedProviders).includes(provider as SupportedProviders)
+  ) {
+    throw new Error(
+      `Invalid provider: Only ${SUPPORTED_PROVIDERS.join(", ")} are supported`
+    );
+  }
+
+  return provider as SupportedProviders;
 }
