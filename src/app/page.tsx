@@ -72,32 +72,41 @@ export default function Dashboard() {
   });
   const [isEvaluating, setIsEvaluating] = useState(false);
 
-  useEffect(() => {
-    if (githubUrl.includes("github.com")) {
-      const [user, repo] = convertGitHubURLToUserRepo(githubUrl);
-      setGithubUrl(`${user}/${repo}`);
+  // Handle GitHub URL processing and file listing
+  const processGitHubUrl = async (url: string) => {
+    if (url.includes("github.com")) {
+      const [user, repo] = convertGitHubURLToUserRepo(url);
       const combinedUserRepo = `${user}/${repo}`;
-      listMdFiles(combinedUserRepo).then((data) => {
-        setAvailableFiles(
-          data.filter((file) => isMdModel(combinedUserRepo, file))
-        );
-      });
-    } else {
-      listMdFiles(githubUrl).then(async (data) => {
-        const filteredFiles = await Promise.all(
-          data.map((file) => isMdModel(githubUrl, file))
-        ).then((results) => data.filter((_, index) => results[index]));
-        setAvailableFiles(filteredFiles);
-      });
+      setGithubUrl(combinedUserRepo);
+      return combinedUserRepo;
     }
-    localStorage.setItem("githubUrl", githubUrl);
+    return url;
+  };
+
+  // Filter markdown files that are valid models
+  const getFilteredMdFiles = async (repoPath: string) => {
+    const files = await listMdFiles(repoPath);
+    const filteredFiles = await Promise.all(
+      files.map((file) => isMdModel(repoPath, file))
+    ).then((results) => files.filter((_, index) => results[index]));
+    return filteredFiles;
+  };
+
+  useEffect(() => {
+    const debounceTimeout = setTimeout(async () => {
+      const processedUrl = await processGitHubUrl(githubUrl);
+      const filteredFiles = await getFilteredMdFiles(processedUrl);
+      setAvailableFiles(filteredFiles);
+      localStorage.setItem("githubUrl", githubUrl);
+    }, 1500);
+
+    return () => clearTimeout(debounceTimeout);
   }, [githubUrl]);
 
   useEffect(() => {
     if (!path) {
       return;
     }
-
     fetchFromGitHub(githubUrl, path).then((data) => {
       const objects = getMdModelObjects(data);
       setOptions(objects);
