@@ -128,12 +128,16 @@ export async function evaluateSchemaPrompt(
   });
 
   let message = chatCompletion.choices[0].message.content ?? "";
-  let response = {
-    fits: message.includes("<FIT>") ? true : false,
-    reason: message.includes("<FIT>")
-      ? message.replace("<FIT>", "").replace("<UNFIT>", "")
-      : message.replace("<UNFIT>", "").replace("<FIT>", ""),
-  };
+  function evaluateMessage(message: string) {
+    const fits = /\s*<FIT>\s*/.test(message);
+    const reason = fits
+      ? message.replace(/\s*<FIT>\s*/, "").replace(/\s*<UNFIT>\s*/, "")
+      : message.replace(/\s*<UNFIT>\s*/, "").replace(/\s*<FIT>\s*/, "");
+
+    return { fits, reason };
+  }
+
+  let response = evaluateMessage(message);
 
   return response;
 }

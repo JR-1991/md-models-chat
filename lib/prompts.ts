@@ -78,8 +78,8 @@ For missing fields, provide the field name and its description. Example:
 - *field_name*: <Field description>
 
 Extremely important:
-- If the text does not fit add <UNFIT> to the report.
-- If the text fits add <FIT> to the report.
+- If the text does not fit add exactly <UNFIT> to the end of the report.
+- If the text fits add exactly <FIT> to the end of the report.
 - Schema suggestions do not count as UNFIT.
 
 Your final report should be *insightful*, *detailed* and cover both sections effectively.
