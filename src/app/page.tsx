@@ -240,6 +240,7 @@ export default function Dashboard() {
                       <Input
                         id="github-url"
                         value={githubUrl}
+                        disabled={true}
                         onChange={(e) => setGithubUrl(e.target.value)}
                         placeholder="User/Repo"
                         className="bg-[#0d1117] border-gray-700 text-white placeholder-gray-500"
