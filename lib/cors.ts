@@ -1,5 +1,3 @@
-import { getBaseUrl } from "./utils";
-
 /**
  * Creates CORS headers for HTTP responses.
  *
