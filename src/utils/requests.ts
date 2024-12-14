@@ -31,8 +31,8 @@ export async function evaluateSchemaPrompt(
   schema: string,
   apiKey: string
 ): Promise<EvaluateSchemaPromptResponse> {
-  const baseUrl = getBaseUrl();
-  const response = await fetch(`${baseUrl}/api/evaluate`, {
+  // const baseUrl = getRemoteBaseUrl();
+  const response = await fetch(`/api/evaluate`, {
     method: "POST",
     credentials: "include",
     body: JSON.stringify({
@@ -68,8 +68,8 @@ export async function createKnowledgeGraph(
   prePrompt: string,
   apiKey?: string
 ): Promise<KnowledgeGraph> {
-  const baseUrl = getBaseUrl();
-  const response = await fetch(`${baseUrl}/api/graph`, {
+  // const baseUrl = getRemoteBaseUrl();
+  const response = await fetch(`/api/graph`, {
     method: "POST",
     credentials: "include",
     body: JSON.stringify({
@@ -107,8 +107,8 @@ export async function extractToSchema(
   apiKey?: string,
   multipleOutputs: boolean = false
 ): Promise<Record<string, unknown>> {
-  const baseUrl = getBaseUrl();
-  const response = await fetch(`${baseUrl}/api/extract`, {
+  // const baseUrl = getRemoteBaseUrl();
+  const response = await fetch(`/api/extract`, {
     method: "POST",
     credentials: "include",
     body: JSON.stringify({
@@ -138,8 +138,8 @@ export async function extractToSchema(
  * @returns A promise that resolves to a boolean indicating validity.
  */
 export async function checkPassword(password: string): Promise<boolean> {
-  const baseUrl = getBaseUrl();
-  const response = await fetch(`${baseUrl}/api/login?secret=${password}`, {
+  // const baseUrl = getRemoteBaseUrl();
+  const response = await fetch(`/api/login?secret=${password}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -155,8 +155,8 @@ export async function checkPassword(password: string): Promise<boolean> {
  * @throws An error if setting the JWT cookie fails.
  */
 export async function setJWTCookie() {
-  const baseUrl = getBaseUrl();
-  const response = await fetch(`${baseUrl}/api/auth`, {
+  // const baseUrl = getRemoteBaseUrl();
+  const response = await fetch(`/api/auth`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -174,20 +174,23 @@ export async function setJWTCookie() {
  * @returns The base URL as a string.
  * @throws An error if retrieving the base URL fails.
  */
-function getBaseUrl() {
-  try {
-    // First try to get VERCEL_URL
-    if (import.meta.env.VITE_VERCEL_URL) {
-      return import.meta.env.VITE_VERCEL_URL;
-    }
-    // Then try to get VITE_PUBLIC_BASE_URL
-    if (import.meta.env.VITE_PUBLIC_BASE_URL) {
-      return import.meta.env.VITE_PUBLIC_BASE_URL;
-    }
-    // Eventually fall back to localhost:3000
-    return "http://localhost:3000";
-  } catch (error) {
-    console.error("Failed to get base URL", error);
-    throw error;
-  }
-}
+// function getRemoteBaseUrl() {
+//   try {
+//     if (import.meta.env.VITE_VERCEL_PROJECT_PRODUCTION_URL) {
+//       return import.meta.env.VITE_VERCEL_PROJECT_PRODUCTION_URL;
+//     }
+
+//     // First try to get VITE_VERCEL_URL
+//     if (import.meta.env.VITE_VERCEL_URL) {
+//       return import.meta.env.VITE_VERCEL_URL;
+//     }
+
+//     // Then try to get VITE_PUBLIC_BASE_URL
+//     if (import.meta.env.VITE_PUBLIC_BASE_URL) {
+//       return import.meta.env.VITE_PUBLIC_BASE_URL;
+//     }
+//   } catch (error) {
+//     console.error("Failed to get base URL", error);
+//     throw error;
+//   }
+// }

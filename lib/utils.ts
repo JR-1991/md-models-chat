@@ -46,20 +46,3 @@ export function convertKnowledgeGraphToTriplets(
       .join("\n")
   );
 }
-
-/**
- * Retrieves the base URL for the application.
- *
- * This function checks for the Vercel URL in the environment variables.
- * If it is not set, it checks for an allowed origin. If neither is
- * available, it defaults to "http://localhost:3000".
- *
- * @returns The base URL for the application.
- */
-export function getBaseUrl(): string {
-  return (
-    process.env.VITE_VERCEL_URL ??
-    process.env.ALLOWED_ORIGIN ??
-    "http://localhost:3000"
-  );
-}

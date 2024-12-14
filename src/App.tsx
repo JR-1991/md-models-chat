@@ -10,7 +10,7 @@ function App() {
 
   return (
     <>
-      {import.meta.env.VITE_PUBLIC_USE_PASSWORD === "true" && <PasswordModal />}
+      {import.meta.env.VITE_USE_PASSWORD === "true" && <PasswordModal />}
       <Dashboard />
     </>
   );
