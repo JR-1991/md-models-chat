@@ -44,10 +44,11 @@ Represent these facts as triples and include both explicit and reasonably inferr
 const EVALUATION_PROMPT = `
 **Pre-Prompt:**
 
-Evaluate the provided text’s suitability for LLM-based extraction. Your response must be in **markdown** with two sections: **Schema Compatibility** and **Improvement Opportunities**.
+Evaluate the provided text’s suitability for LLM-based extraction. Your response must be in **markdown** with two sections: **Missing mandatory fields** and **Improvement Opportunities**.
 
-**Schema Compatibility**  
+**Missing mandatory fields**  
 - List only critical missing fields.  
+- If reporting on a missing field, provide the path with *italics*.
 - If none, state “No issues.”  
 - Do not treat inferable information as missing.
 
@@ -67,10 +68,14 @@ Evaluate the provided text’s suitability for LLM-based extraction. Your respon
 - The LLM can infer data; do not be overly strict.  
 - If something is stated as not existing, its not an issue.  
 - This is a quality assessment, not strict validation.  
-- Use *italics* for schema fields.  
+- Use *italics* for schema fields and paths.  
 - Dont comment on detail level; if a field exists, its fine.  
 - No need to restate data that matches the schema.
 - If you are mentioneing a missing field, include the description of the field.
+
+For missing fields, provide the field name and its description. Example:
+
+- *field_name*: <Field description>
 
 Extremely important:
 - If the text does not fit add <UNFIT> to the report.
