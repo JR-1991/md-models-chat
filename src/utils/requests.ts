@@ -29,7 +29,8 @@ export interface KnowledgeGraph {
 export async function evaluateSchemaPrompt(
   text: string,
   schema: string,
-  apiKey: string
+  apiKey: string,
+  systemPrompt?: string
 ): Promise<EvaluateSchemaPromptResponse> {
   // const baseUrl = getRemoteBaseUrl();
   const response = await fetch(`/api/evaluate`, {
@@ -39,6 +40,7 @@ export async function evaluateSchemaPrompt(
       text,
       schema,
       api_key: apiKey,
+      system_prompt: systemPrompt,
     }),
     headers: {
       "Content-Type": "application/json",
@@ -76,6 +78,7 @@ export async function createKnowledgeGraph(
       prompt,
       pre_prompt: prePrompt,
       api_key: apiKey,
+      system_prompt: prePrompt,
     }),
     headers: {
       "Content-Type": "application/json",
@@ -102,20 +105,22 @@ export async function createKnowledgeGraph(
  * @throws An error if the extraction fails.
  */
 export async function extractToSchema(
-  graph: KnowledgeGraph,
+  text: string,
   schema: string,
   apiKey?: string,
-  multipleOutputs: boolean = false
+  multipleOutputs: boolean = false,
+  systemPrompt?: string
 ): Promise<Record<string, unknown>> {
   // const baseUrl = getRemoteBaseUrl();
   const response = await fetch(`/api/extract`, {
     method: "POST",
     credentials: "include",
     body: JSON.stringify({
-      graph,
+      text,
       schema,
       api_key: apiKey,
       multiple_outputs: multipleOutputs,
+      system_prompt: systemPrompt,
     }),
     headers: {
       "Content-Type": "application/json",

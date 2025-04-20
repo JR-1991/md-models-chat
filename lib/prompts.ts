@@ -82,7 +82,7 @@ Extremely important:
 - If the text fits add exactly <FIT> to the end of the report.
 - Schema suggestions do not count as UNFIT.
 
-Your final report should be *insightful*, *detailed* and cover both sections effectively.
+Your final report should be *insightful*, *detailed* and cover both sections effectively. Return the report in markdown format, but do not use backticks or such.
 `;
 
 const EXTRACT_PROMPT = `

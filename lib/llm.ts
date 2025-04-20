@@ -1,30 +1,20 @@
 import OpenAI from "openai";
-import { z } from "zod";
 import zodToJsonSchema from "zod-to-json-schema";
 import { KnowledgeGraphSchema } from "./schemes";
-import {
-  EVALUATION_PROMPT,
-  EXTRACT_PROMPT,
-  KNOWLEDGE_GRAPH_PROMPT,
-} from "./prompts";
-import { convertKnowledgeGraphToTriplets } from "./utils";
+import { EVALUATION_PROMPT, KNOWLEDGE_GRAPH_PROMPT } from "./prompts";
 
 export interface ExtractionEvaluation {
   fits: boolean;
   reason: string;
 }
 
-const SUPPORTED_PROVIDERS = ["openai", "ollama", "mistral"];
-const DEFAULT_PROVIDER = "openai";
-
-// Fallback model for all LLM calls
-const DEFAULT_LLM_MODEL = "gpt-4o";
-
-export enum SupportedProviders {
-  OpenAI = "openai",
-  Ollama = "ollama",
-  Mistral = "mistral",
-}
+const LLM_MODEL = process.env.LLM_MODEL ?? "gpt-4o";
+const DEFAULT_PRE_PROMPT = `You are a helpful assistant that understands JSON schemas. 
+  If you think the given text does not fit the schema, set the 'fits' 
+  property to false and leave the 'data' or 'items' property empty. Otherwise, 
+  set it to true and fill in the 'data' or 'items' property with the data that fits the schema.
+  
+  You are tasked to extract data from a given text. If something is not supplied directly, leave it empty.`;
 
 /**
  * Extracts data from a given text based on a specified schema and knowledge graph.
@@ -38,22 +28,12 @@ export enum SupportedProviders {
  */
 export default async function extractToSchema(
   schema: string,
-  graph: z.infer<typeof KnowledgeGraphSchema>,
+  text: string,
   apiKey: string,
-  multipleOutputs: boolean
+  multipleOutputs: boolean,
+  systemPrompt: string
 ) {
-  if (!graph || !Array.isArray(graph.triplets)) {
-    throw new Error(
-      "Invalid knowledge graph structure: missing or invalid triplets array"
-    );
-  }
-
-  const client = setupClient(
-    apiKey,
-    evaluateProvider(process.env.EXTRACT_PROVIDER)
-  );
-  const model = process.env.EXTRACT_LLM_MODEL ?? DEFAULT_LLM_MODEL;
-
+  const client = setupClient(apiKey);
   let schema_obj = JSON.parse(schema);
 
   if (multipleOutputs) {
@@ -74,14 +54,16 @@ export default async function extractToSchema(
     };
   }
 
-  const prompt = convertKnowledgeGraphToTriplets(graph);
+  // const prompt = convertKnowledgeGraphToTriplets(graph);
+  const prompt = text;
   const chatCompletion = await client.chat.completions.create({
     messages: [
-      { role: "system", content: EXTRACT_PROMPT },
+      { role: "user", content: systemPrompt },
+      { role: "user", content: DEFAULT_PRE_PROMPT },
       { role: "user", content: prompt },
     ],
-    model: model,
-    temperature: 0,
+    model: LLM_MODEL,
+    temperature: 0.0,
     response_format: {
       type: "json_schema",
       json_schema: {
@@ -106,38 +88,32 @@ export default async function extractToSchema(
 export async function evaluateSchemaPrompt(
   text: string,
   schema: string,
-  apiKey: string
+  apiKey: string,
+  systemPrompt: string
 ): Promise<ExtractionEvaluation> {
-  const client = setupClient(
-    apiKey,
-    evaluateProvider(process.env.EVAL_PROVIDER)
-  );
-  const model = process.env.EVAL_LLM_MODEL ?? DEFAULT_LLM_MODEL;
+  const client = setupClient(apiKey);
 
   const chatCompletion = await client.chat.completions.create({
     messages: [
+      { role: "user", content: systemPrompt },
       {
-        role: "system",
+        role: "user",
         content: EVALUATION_PROMPT,
       },
       { role: "user", content: "Schema: \n" + schema },
       { role: "user", content: "Text: \n" + text },
     ],
-    model: model,
-    temperature: 0,
+    model: LLM_MODEL,
+    temperature: 0.0,
   });
 
   let message = chatCompletion.choices[0].message.content ?? "";
-  function evaluateMessage(message: string) {
-    const fits = /\s*<FIT>\s*/.test(message);
-    const reason = fits
-      ? message.replace(/\s*<FIT>\s*/, "").replace(/\s*<UNFIT>\s*/, "")
-      : message.replace(/\s*<UNFIT>\s*/, "").replace(/\s*<FIT>\s*/, "");
-
-    return { fits, reason };
-  }
-
-  let response = evaluateMessage(message);
+  message = message.replace(/`/g, "");
+  const fitMatch = message.match(/<\s*FIT\s*>/);
+  let response = {
+    fits: !!fitMatch,
+    reason: message.replace(/<\s*(?:FIT|UNFIT)\s*>/g, "").trim(),
+  };
 
   return response;
 }
@@ -155,21 +131,17 @@ export async function createKnowledgeGraph(
   pre_prompt: string,
   apiKey: string
 ): Promise<typeof KnowledgeGraphSchema> {
-  const client = setupClient(
-    apiKey,
-    evaluateProvider(process.env.KNOWLEDGE_GRAPH_PROVIDER)
-  );
+  const client = setupClient(apiKey);
   const schema = zodToJsonSchema(KnowledgeGraphSchema, { target: "openAi" });
-  const model = process.env.KNOWLEDGE_GRAPH_LLM_MODEL ?? DEFAULT_LLM_MODEL;
 
   const chatCompletion = await client.chat.completions.create({
     messages: [
-      { role: "system", content: KNOWLEDGE_GRAPH_PROMPT },
       { role: "user", content: pre_prompt },
+      { role: "user", content: KNOWLEDGE_GRAPH_PROMPT },
       { role: "user", content: prompt },
     ],
-    model: model,
-    temperature: 0,
+    model: LLM_MODEL,
+    temperature: 0.0,
     response_format: {
       type: "json_schema",
       json_schema: {
@@ -189,35 +161,15 @@ export async function createKnowledgeGraph(
  * @param {string} apiKey - The API key for authentication.
  * @returns {OpenAI} - The configured OpenAI client.
  */
-function setupClient(apiKey: string, provider: SupportedProviders) {
-  if (provider !== SupportedProviders.OpenAI) {
-    if (!process.env.LLM_BASE_URL) {
-      throw new Error("LLM_BASE_URL is not set");
-    }
-
+function setupClient(apiKey: string) {
+  if (process.env.OLLAMA_URL) {
     return new OpenAI({
-      apiKey: "some_key",
-      baseURL: process.env.LLM_BASE_URL,
+      apiKey: apiKey,
+      baseURL: process.env.OLLAMA_URL,
     });
   }
 
   return new OpenAI({
     apiKey: apiKey,
   });
-}
-
-function evaluateProvider(provider: string | undefined): SupportedProviders {
-  if (provider === "openai" || !provider) {
-    return SupportedProviders.OpenAI;
-  }
-
-  if (
-    !Object.values(SupportedProviders).includes(provider as SupportedProviders)
-  ) {
-    throw new Error(
-      `Invalid provider: Only ${SUPPORTED_PROVIDERS.join(", ")} are supported`
-    );
-  }
-
-  return provider as SupportedProviders;
 }
