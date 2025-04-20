@@ -75,13 +75,15 @@ export default function Dashboard() {
   }, [githubUrl]);
 
   useEffect(() => {
-    fetchFromGitHub(githubUrl, path).then((data) => {
-      const objects = getMdModelObjects(data);
-      // @ts-ignore
-      setOptions(objects);
-      setMarkdownContent(data);
-    });
-    localStorage.setItem("selectedPath", path);
+    if (githubUrl && path) {
+      fetchFromGitHub(githubUrl, path).then((data) => {
+        const objects = getMdModelObjects(data);
+        // @ts-ignore
+        setOptions(objects);
+        setMarkdownContent(data);
+      });
+      localStorage.setItem("selectedPath", path);
+    }
   }, [path]);
 
   useEffect(() => {
