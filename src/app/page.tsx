@@ -20,7 +20,7 @@ import { ResponseCard } from "@/components/ResponseCard";
 
 export default function Dashboard() {
   const [githubUrl, setGithubUrl] = useState(() => {
-    return localStorage.getItem("githubUrl") || "";
+    return localStorage.getItem("githubUrl") || "https://github.com/Strenda-biocatalysis/Strenda-biocatalysis";
   });
 
   const [path, setPath] = useState(() => {
