@@ -1,10 +1,7 @@
 import OpenAI from "openai";
-import { z } from "zod";
 import zodToJsonSchema from "zod-to-json-schema";
 import { KnowledgeGraphSchema } from "./schemes";
-import { EvaluationSchema } from "./schemes";
 import { EVALUATION_PROMPT, KNOWLEDGE_GRAPH_PROMPT } from "./prompts";
-import { convertKnowledgeGraphToTriplets } from "./utils";
 
 export interface ExtractionEvaluation {
   fits: boolean;
@@ -31,16 +28,11 @@ const DEFAULT_PRE_PROMPT = `You are a helpful assistant that understands JSON sc
  */
 export default async function extractToSchema(
   schema: string,
-  graph: z.infer<typeof KnowledgeGraphSchema>,
+  text: string,
   apiKey: string,
-  multipleOutputs: boolean
+  multipleOutputs: boolean,
+  systemPrompt: string
 ) {
-  if (!graph || !Array.isArray(graph.triplets)) {
-    throw new Error(
-      "Invalid knowledge graph structure: missing or invalid triplets array"
-    );
-  }
-
   const client = setupClient(apiKey);
   let schema_obj = JSON.parse(schema);
 
@@ -62,14 +54,16 @@ export default async function extractToSchema(
     };
   }
 
-  const prompt = convertKnowledgeGraphToTriplets(graph);
+  // const prompt = convertKnowledgeGraphToTriplets(graph);
+  const prompt = text;
   const chatCompletion = await client.chat.completions.create({
     messages: [
-      { role: "system", content: DEFAULT_PRE_PROMPT },
+      { role: "user", content: systemPrompt },
+      { role: "user", content: DEFAULT_PRE_PROMPT },
       { role: "user", content: prompt },
     ],
     model: LLM_MODEL,
-    temperature: 0,
+    // temperature: 0.1,
     response_format: {
       type: "json_schema",
       json_schema: {
@@ -94,28 +88,31 @@ export default async function extractToSchema(
 export async function evaluateSchemaPrompt(
   text: string,
   schema: string,
-  apiKey: string
+  apiKey: string,
+  systemPrompt: string
 ): Promise<ExtractionEvaluation> {
   const client = setupClient(apiKey);
+
   const chatCompletion = await client.chat.completions.create({
     messages: [
+      { role: "user", content: systemPrompt },
       {
-        role: "system",
+        role: "user",
         content: EVALUATION_PROMPT,
       },
       { role: "user", content: "Schema: \n" + schema },
       { role: "user", content: "Text: \n" + text },
     ],
     model: LLM_MODEL,
-    temperature: 0,
+    // temperature: 0.1,
   });
 
   let message = chatCompletion.choices[0].message.content ?? "";
+  message = message.replace(/`/g, "");
+  const fitMatch = message.match(/<\s*FIT\s*>/);
   let response = {
-    fits: message.includes("<FIT>") ? true : false,
-    reason: message.includes("<FIT>")
-      ? message.replace("<FIT>", "").replace("<UNFIT>", "")
-      : message.replace("<UNFIT>", "").replace("<FIT>", ""),
+    fits: !!fitMatch,
+    reason: message.replace(/<\s*(?:FIT|UNFIT)\s*>/g, "").trim(),
   };
 
   return response;
@@ -139,12 +136,12 @@ export async function createKnowledgeGraph(
 
   const chatCompletion = await client.chat.completions.create({
     messages: [
-      { role: "system", content: KNOWLEDGE_GRAPH_PROMPT },
       { role: "user", content: pre_prompt },
+      { role: "user", content: KNOWLEDGE_GRAPH_PROMPT },
       { role: "user", content: prompt },
     ],
     model: LLM_MODEL,
-    temperature: 0,
+    // temperature: 0.1,
     response_format: {
       type: "json_schema",
       json_schema: {

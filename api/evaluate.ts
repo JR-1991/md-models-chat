@@ -11,6 +11,7 @@ interface EvaluationRequest {
   text: string;
   schema: string;
   api_key?: string;
+  system_prompt?: string;
 }
 
 /**
@@ -26,10 +27,15 @@ export async function POST(request: Request): Promise<Response> {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  let { text, schema, api_key }: EvaluationRequest = await request.json();
+  let { text, schema, api_key, system_prompt }: EvaluationRequest =
+    await request.json();
   const apiKey = getOpenAIApiKey(api_key);
 
-  const res = await evaluateSchemaPrompt(text, schema, apiKey);
+  if (!system_prompt) {
+    system_prompt = "";
+  }
+
+  const res = await evaluateSchemaPrompt(text, schema, apiKey, system_prompt);
 
   return new Response(JSON.stringify(res), {
     headers: createCorsHeaders(),

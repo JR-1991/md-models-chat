@@ -34,6 +34,8 @@ import {
 import { Spinner } from "@/components/spinner";
 import { Viewer } from "@/components/viewer";
 import { KnowledgeGraph as KnowledgeGraphType } from "@/utils/requests";
+import Tiptap from "@/components/editor";
+
 export default function Dashboard() {
   const [githubUrl, setGithubUrl] = useState(() => {
     return localStorage.getItem("githubUrl") || "";
@@ -47,7 +49,7 @@ export default function Dashboard() {
     return localStorage.getItem("selectedOption") || null;
   });
 
-  const [preprompt] = useState(() => {
+  const [preprompt, setPreprompt] = useState(() => {
     return localStorage.getItem("preprompt") || "";
   });
 
@@ -131,10 +133,15 @@ export default function Dashboard() {
       const evaluation = await evaluateSchemaPrompt(
         leftPanelText,
         schema,
-        openAIKey
+        openAIKey,
+        preprompt
       );
 
-      const graph = await createKnowledgeGraph(leftPanelText, openAIKey);
+      const graph = await createKnowledgeGraph(
+        leftPanelText,
+        preprompt,
+        openAIKey
+      );
 
       setEvaluation(evaluation);
       setIsEvaluating(false);
@@ -150,10 +157,11 @@ export default function Dashboard() {
       if (evaluation.fits) {
         try {
           let jsonData = await extractToSchema(
-            graph,
+            leftPanelText,
             schema,
             openAIKey,
-            isMultiple
+            isMultiple,
+            preprompt
           );
 
           setJsonData(jsonData);
@@ -188,31 +196,31 @@ export default function Dashboard() {
           </div>
 
           <div className="relative max-w-[1400px] mx-auto px-4 pt-20 pb-16">
-            <h1 className="text-4xl md:text-5xl font-semibold text-white mb-6 text-center">
+            <h1 className="mb-6 text-4xl font-semibold text-center text-white md:text-5xl">
               <RiStackLine className="inline-block mr-2" /> MD-Models Chat
             </h1>
-            <p className="text-xl text-gray-400 mb-8 text-center">
+            <p className="mb-8 text-xl text-center text-gray-400">
               Turn your unstructured data into structured data
             </p>
 
             <Card className="shadow-lg bg-[#161b22] border-gray-700 mb-8">
               <CardHeader>
-                <CardTitle className="text-2xl font-semibold text-gray-100 flex items-center">
+                <CardTitle className="flex items-center text-2xl font-semibold text-gray-100">
                   <Github className="mr-2" /> Repository Details
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label
                         htmlFor="github-url"
-                        className="text-gray-300 flex items-center"
+                        className="flex items-center text-gray-300"
                       >
                         GitHub URL
                         <Tooltip>
                           <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 ml-2 text-gray-400" />
+                            <HelpCircle className="w-4 h-4 ml-2 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>
@@ -232,12 +240,12 @@ export default function Dashboard() {
                     <div className="space-y-2">
                       <Label
                         htmlFor="path"
-                        className="text-gray-300 flex items-center"
+                        className="flex items-center text-gray-300"
                       >
                         Path
                         <Tooltip>
                           <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 ml-2 text-gray-400" />
+                            <HelpCircle className="w-4 h-4 ml-2 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>
@@ -267,12 +275,12 @@ export default function Dashboard() {
                     <div className="space-y-2">
                       <Label
                         htmlFor="option"
-                        className="text-gray-300 flex items-center"
+                        className="flex items-center text-gray-300"
                       >
                         Select Model
                         <Tooltip>
                           <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 ml-2 text-gray-400" />
+                            <HelpCircle className="w-4 h-4 ml-2 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>Choose a model for data processing</p>
@@ -297,12 +305,12 @@ export default function Dashboard() {
                     <div className="space-y-2">
                       <Label
                         htmlFor="openai-key"
-                        className="text-gray-300 flex items-center"
+                        className="flex items-center text-gray-300"
                       >
                         OpenAI Key
                         <Tooltip>
                           <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 ml-2 text-gray-400" />
+                            <HelpCircle className="w-4 h-4 ml-2 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>Enter your OpenAI API key</p>
@@ -330,55 +338,38 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* <Collapsible
-              open={isPrepromptOpen}
-              onOpenChange={setIsPrepromptOpen}
-              className="mb-8 transition-all duration-300 ease-in-out"
-            >
-              <Card className="shadow-lg bg-[#161b22] border-gray-700">
-                <CardHeader>
-                  <CollapsibleTrigger asChild>
-                    <div className="flex items-center justify-between w-full group cursor-pointer">
-                      <CardTitle className="text-2xl font-semibold text-gray-100 flex items-center">
-                        Preprompt
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 ml-2 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Enter a preprompt to guide the data analysis</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </CardTitle>
-                      {isPrepromptOpen ? (
-                        <ChevronUp className="h-6 w-6 text-white transition-transform duration-200 group-hover:rotate-180" />
-                      ) : (
-                        <ChevronDown className="h-6 w-6 text-white transition-transform duration-200 group-hover:-rotate-180" />
-                      )}
-                    </div>
-                  </CollapsibleTrigger>
-                </CardHeader>
-                <CollapsibleContent className="transition-all duration-300 ease-in-out">
-                  <CardContent>
-                    <Textarea
-                      value={preprompt}
-                      onChange={(e) => setPreprompt(e.target.value)}
-                      placeholder="Enteryour preprompt here..."
-                      className="min-h-[100px] bg-[#0d1117] border-gray-700 text-white placeholder-gray-500"
-                    />
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible> */}
+            <Card className="shadow-lg bg-[#161b22] border-gray-700 mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center text-2xl font-semibold text-gray-100">
+                  Preprompt
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <HelpCircle className="w-4 h-4 ml-2 text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Enter a preprompt to guide the data analysis</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  value={preprompt}
+                  onChange={(e) => setPreprompt(e.target.value)}
+                  placeholder="Enteryour preprompt here..."
+                  className="min-h-[100px] bg-[#0d1117] border-gray-700 text-white placeholder-gray-500"
+                />
+              </CardContent>
+            </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 [&>*]:h-full">
               <Card className="shadow-lg bg-[#161b22] border-gray-700 flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-xl font-semibold text-gray-100 flex items-center">
+                  <CardTitle className="flex items-center text-xl font-semibold text-gray-100">
                     Text Input
                     <Tooltip>
                       <TooltipTrigger>
-                        <HelpCircle className="h-4 w-4 ml-2 text-gray-400" />
+                        <HelpCircle className="w-4 h-4 ml-2 text-gray-400" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>Enter the text you want to parse</p>
@@ -420,11 +411,11 @@ export default function Dashboard() {
               </Card>
               <Card className="shadow-lg bg-[#161b22] border-gray-700 flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-xl font-semibold text-gray-100 flex items-center">
+                  <CardTitle className="flex items-center text-xl font-semibold text-gray-100">
                     Response
                     <Tooltip>
                       <TooltipTrigger>
-                        <HelpCircle className="h-4 w-4 ml-2 text-gray-400" />
+                        <HelpCircle className="w-4 h-4 ml-2 text-gray-400" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>
@@ -440,7 +431,7 @@ export default function Dashboard() {
                     className="h-6 w-6 bg-[#21262d] border-gray-600 hover:bg-[#30363d] text-white"
                     title="Download JSON"
                   >
-                    <Download className="h-3 w-3" />
+                    <Download className="w-3 h-3" />
                     <span className="sr-only">Download JSON</span>
                   </Button>
                 </CardHeader>
