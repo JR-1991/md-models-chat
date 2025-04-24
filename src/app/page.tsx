@@ -37,7 +37,7 @@ export default function Dashboard() {
     return localStorage.getItem("uploadedFileName") || "";
   });
 
-  const [uploadedContent, setUploadedContent] = useState(() => {
+  const [_, setUploadedContent] = useState(() => {
     return localStorage.getItem("uploadedContent") || "";
   });
 
