@@ -201,7 +201,7 @@ export default function Dashboard() {
             </p>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-              <TabsList className="w-1/4 py-6 shadow-lg rounded-xl bg-[#161b22] border border-gray-700">
+              <TabsList className="w-1/4 py-6 px-2 shadow-lg rounded-xl bg-[#161b22] border border-gray-700">
                 <TabsTrigger value="github" className="flex-1">GitHub Repository</TabsTrigger>
                 <TabsTrigger value="upload" className="flex-1">Upload File</TabsTrigger>
               </TabsList>
