@@ -1,4 +1,4 @@
-import { parse_model, json_schema } from "mdmodels-core";
+import { parse_model, json_schema, validate, ValidationError } from "mdmodels-core";
 import fetchFromGitHub from "./github";
 
 /**
@@ -9,6 +9,11 @@ import fetchFromGitHub from "./github";
  */
 export default function getMdModelObjects(content: string) {
   try {
+    const validation = validate(content);
+    if (!validation.is_valid) {
+      alert("Invalid model: " + formatErrors(validation.errors));
+      return [];
+    }
     const model = parse_model(content);
     return model.objects.map((object: { name: string }) => {
       return object.name;
@@ -17,6 +22,18 @@ export default function getMdModelObjects(content: string) {
     alert("Error parsing model: " + error);
     return [];
   }
+}
+
+/**
+ * Formats validation errors into a readable string.
+ *
+ * @param {ValidationError[]} errors - The validation errors to format.
+ * @returns {string} A formatted string containing the error details.
+ */
+function formatErrors(errors: ValidationError[]) {
+  return errors.map((error) => {
+    return `${error.error_type} [${error.location}]: "${error.message}"`;
+  }).join("\n");
 }
 
 /**
