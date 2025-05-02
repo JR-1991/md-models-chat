@@ -44,7 +44,7 @@ Represent these facts as triples and include both explicit and reasonably inferr
 const EVALUATION_PROMPT = `
 **Pre-Prompt:**
 
-Evaluate the provided text’s suitability for LLM-based extraction. Your response must be in **markdown** with two sections: **Missing mandatory fields** and **Improvement Opportunities**.
+Evaluate the provided text’s suitability for LLM-based extraction. Your response must be in **markdown** with three sections: **Missing mandatory fields**, **Improvement Opportunities** and **Description improvements**.
 
 **Missing mandatory fields**  
 - List only critical missing fields.  
@@ -57,6 +57,11 @@ Evaluate the provided text’s suitability for LLM-based extraction. Your respon
 - If none, state “No improvements needed.”
 - When suggesting a field, include the description found in the schema.
 
+**Description improvements**
+- Provide general suggestions for improving the description of the schema.
+- Focus on how a description can be improved to be more accurate and useful.
+- Optimize it for LLM-based extraction.
+- List the JSON path and the new description.
 
 **Schema Improvements**
 - Provide general suggestions for adapting the schema based on the knowledge graph.
