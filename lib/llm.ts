@@ -40,17 +40,13 @@ export default async function extractToSchema(
     schema_obj = {
       type: "object",
       properties: {
-        fits: {
-          type: "boolean",
-          description: "Whether the given text fits the schema.",
-        },
         items: {
           type: "array",
           items: schema_obj,
         },
       },
       additionalProperties: false,
-      required: [],
+      required: ["items"],
     };
   }
 
