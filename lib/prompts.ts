@@ -61,7 +61,8 @@ Evaluate the provided text’s suitability for LLM-based extraction. Your respon
 - Provide general suggestions for improving the description of the schema.
 - Focus on how a description can be improved to be more accurate and useful.
 - Optimize it for LLM-based extraction.
-- List the JSON path and the new description.
+- Take care that the description is not too implicit, but allow for some expected domain knowledge.
+- List the JSON path and the new description as well as an explanation of why it is better.
 
 **Schema Improvements**
 - Provide general suggestions for adapting the schema based on the knowledge graph.
