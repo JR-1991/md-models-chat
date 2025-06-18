@@ -52,25 +52,26 @@ export default async function extractToSchema(
 
   // const prompt = convertKnowledgeGraphToTriplets(graph);
   const prompt = text;
-  const chatCompletion = await client.chat.completions.create({
-    messages: [
+  const chatCompletion = await client.responses.parse(({
+    input: [
       { role: "user", content: systemPrompt },
       { role: "user", content: DEFAULT_PRE_PROMPT },
       { role: "user", content: prompt },
     ],
+    tools: [{ type: "web_search_preview" }],
     model: LLM_MODEL,
     temperature: 0.0,
-    response_format: {
-      type: "json_schema",
-      json_schema: {
+    text: {
+      format: {
         name: "response",
         strict: true,
+        type: "json_schema",
         schema: schema_obj,
       },
     },
-  });
+  }));
 
-  return JSON.parse(chatCompletion.choices[0].message.content ?? "");
+  return JSON.parse(chatCompletion.output_text ?? "");
 }
 
 /**
