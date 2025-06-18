@@ -14,7 +14,6 @@ export default function getMdModelObjects(content: string) {
       return object.name;
     });
   } catch (error) {
-    alert("Error parsing model: " + error);
     return [];
   }
 }

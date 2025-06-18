@@ -44,10 +44,11 @@ Represent these facts as triples and include both explicit and reasonably inferr
 const EVALUATION_PROMPT = `
 **Pre-Prompt:**
 
-Evaluate the provided text’s suitability for LLM-based extraction. Your response must be in **markdown** with two sections: **Schema Compatibility** and **Improvement Opportunities**.
+Evaluate the provided text’s suitability for LLM-based extraction. Your response must be in **markdown** with three sections: **Missing mandatory fields**, **Improvement Opportunities** and **Description improvements**.
 
-**Schema Compatibility**  
+**Missing mandatory fields**  
 - List only critical missing fields.  
+- If reporting on a missing field, provide the path with *italics*.
 - If none, state “No issues.”  
 - Do not treat inferable information as missing.
 
@@ -56,6 +57,12 @@ Evaluate the provided text’s suitability for LLM-based extraction. Your respon
 - If none, state “No improvements needed.”
 - When suggesting a field, include the description found in the schema.
 
+**Description improvements**
+- Provide general suggestions for improving the description of the schema.
+- Focus on how a description can be improved to be more accurate and useful.
+- Optimize it for LLM-based extraction.
+- Take care that the description is not too implicit, but allow for some expected domain knowledge.
+- List the JSON path and the new description as well as an explanation of why it is better.
 
 **Schema Improvements**
 - Provide general suggestions for adapting the schema based on the knowledge graph.
@@ -67,14 +74,18 @@ Evaluate the provided text’s suitability for LLM-based extraction. Your respon
 - The LLM can infer data; do not be overly strict.  
 - If something is stated as not existing, its not an issue.  
 - This is a quality assessment, not strict validation.  
-- Use *italics* for schema fields.  
+- Use *italics* for schema fields and paths.  
 - Dont comment on detail level; if a field exists, its fine.  
 - No need to restate data that matches the schema.
 - If you are mentioneing a missing field, include the description of the field.
 
+For missing fields, provide the field name and its description. Example:
+
+- *field_name*: <Field description>
+
 Extremely important:
-- If the text does not fit add <UNFIT> to the report.
-- If the text fits add <FIT> to the report.
+- If the text does not fit add exactly <UNFIT> to the end of the report.
+- If the text fits add exactly <FIT> to the end of the report.
 - Schema suggestions do not count as UNFIT.
 
 Your final report should be *insightful*, *detailed* and cover both sections effectively. Return the report in markdown format, but do not use backticks or such.
