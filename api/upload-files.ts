@@ -1,6 +1,7 @@
 import createCorsHeaders from "../lib/cors";
 import { uploadFilesToOpenAI, UploadedFileInfo } from "../lib/llm";
 import { verifyToken } from "../lib/token";
+import { getOpenAIApiKey } from "../lib/utils";
 
 export const config = {
     runtime: "edge",
@@ -23,7 +24,6 @@ export async function POST(request: Request): Promise<Response> {
         return new Response("Unauthorized", { status: 401 });
     }
 
-
     try {
         const contentType = request.headers.get('content-type');
 
@@ -35,6 +35,11 @@ export async function POST(request: Request): Promise<Response> {
         }
 
         const formData = await request.formData();
+
+        // Add API key from environment to formData for the uploadFilesToOpenAI function
+        const apiKey = getOpenAIApiKey();
+        formData.append('api_key', apiKey);
+
         const uploadedFiles = await uploadFilesToOpenAI(formData);
         const response: UploadResponse = {
             files: uploadedFiles

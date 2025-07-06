@@ -10,9 +10,9 @@ export const config = {
 interface EvaluationRequest {
   text: string;
   schema: string;
-  api_key?: string;
   system_prompt?: string;
   file_references?: OpenAIFileReference[];
+  model?: string;
 }
 
 /**
@@ -29,7 +29,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const { text, schema, api_key, system_prompt, file_references }: EvaluationRequest =
+    const { text, schema, system_prompt, file_references, model }: EvaluationRequest =
       await request.json();
 
     // Validate required fields
@@ -40,7 +40,7 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    const apiKey = getOpenAIApiKey(api_key);
+    const apiKey = getOpenAIApiKey();
     const systemPromptValue = system_prompt || "";
 
     // Use file references if provided
@@ -52,7 +52,8 @@ export async function POST(request: Request): Promise<Response> {
       schema,
       apiKey,
       systemPromptValue,
-      fileRefs
+      fileRefs,
+      model
     );
 
     return new Response(JSON.stringify(res), {

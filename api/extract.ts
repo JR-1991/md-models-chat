@@ -10,10 +10,10 @@ export const config = {
 interface ExtractRequest {
   text: string;
   schema: string;
-  api_key?: string;
   multiple_outputs: boolean;
   system_prompt?: string;
   file_references?: OpenAIFileReference[];
+  model?: string;
 }
 
 /**
@@ -30,7 +30,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    let { text, schema, api_key, multiple_outputs, system_prompt, file_references }: ExtractRequest = await request.json();
+    let { text, schema, multiple_outputs, system_prompt, file_references, model }: ExtractRequest = await request.json();
 
     // Validate the required fields
     if (!text || !schema) {
@@ -40,7 +40,7 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    const apiKey = getOpenAIApiKey(api_key);
+    const apiKey = getOpenAIApiKey();
     const systemPromptValue = system_prompt || "";
     const fileRefs = file_references || [];
 
@@ -50,7 +50,8 @@ export async function POST(request: Request): Promise<Response> {
       apiKey,
       multiple_outputs,
       systemPromptValue,
-      fileRefs
+      fileRefs,
+      model
     );
 
     if (res.error) {

@@ -10,8 +10,8 @@ export const config = {
 interface GraphRequest {
   prompt: string;
   pre_prompt: string;
-  api_key?: string;
   file_references?: OpenAIFileReference[];
+  model?: string;
 }
 
 /**
@@ -28,23 +28,16 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    let { prompt, pre_prompt, api_key, file_references }: GraphRequest = await request.json();
+    let { prompt, file_references, model }: GraphRequest = await request.json();
 
-    if (!prompt || !pre_prompt) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields: prompt and pre_prompt" }),
-        { status: 400, headers: createCorsHeaders() }
-      );
-    }
-
-    const apiKey = getOpenAIApiKey(api_key);
+    const apiKey = getOpenAIApiKey();
     const fileRefs = file_references || [];
 
     const res = await createKnowledgeGraph(
       prompt,
-      pre_prompt,
       apiKey,
-      fileRefs
+      fileRefs,
+      model
     );
 
     return new Response(JSON.stringify(res), {
