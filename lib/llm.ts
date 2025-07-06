@@ -44,12 +44,6 @@ export interface UploadedFileInfo {
 }
 
 const LLM_MODEL = process.env.LLM_MODEL ?? "gpt-4o";
-const DEFAULT_PRE_PROMPT = `You are a helpful assistant that understands JSON schemas. 
-  If you think the given text does not fit the schema, set the 'fits' 
-  property to false and leave the 'data' or 'items' property empty. Otherwise, 
-  set it to true and fill in the 'data' or 'items' property with the data that fits the schema.
-  
-  You are tasked to extract data from a given text. If something is not supplied directly, leave it empty.`;
 const DEFAULT_EXTRACT_PROMPT = `You are tasked to extract data from a given text, PDF or image. If something is not supplied directly, leave it empty. Work precisely and do not hallucinate. The following are instructitions that have to be followed strictly: `;
 
 /**
@@ -67,7 +61,7 @@ export default async function extractToSchema(
   text: string,
   apiKey: string,
   multipleOutputs: boolean,
-  systemPrompt: string,
+  _systemPrompt: string,
   fileReferences: OpenAIFileReference[] = []
 ) {
   const client = setupClient(apiKey);

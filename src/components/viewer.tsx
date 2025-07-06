@@ -5,7 +5,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
-import FitBadge from "@/components/fitbadge";
+import FitBadge from "@/components/FitBadge";
 import { Badge } from "./ui/badge";
 import { KnowledgeGraph as KnowledgeGraphType } from "@/utils/requests";
 import { KnowledgeGraph } from "./KnowledgeGraph";

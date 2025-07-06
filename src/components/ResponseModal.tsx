@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Download, X, Settings2, FileText, Brain, CheckCircle } from "lucide-react";
 import { Spinner } from "@/components/Spinner";
-import { Viewer } from "@/components/viewer";
+import { Viewer } from "@/components/Viewer";
 import { KnowledgeGraph as KnowledgeGraphType } from "@/utils/requests";
 import { EvaluateSchemaPromptResponse } from "@/utils/requests";
 import { ResponseSettingsModal } from "@/components/ResponseSettingsModal";
