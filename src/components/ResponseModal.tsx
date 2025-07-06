@@ -7,7 +7,9 @@ import {
 } from "@/components/ui/tooltip";
 import { Download, X, Settings2, FileText, Brain, CheckCircle } from "lucide-react";
 import { Spinner } from "@/components/Spinner";
-import { Viewer } from "@/components/Viewer";
+import { JsonView } from "@/components/JsonView";
+import { KnowledgeGraphView } from "@/components/KnowledgeGraphView";
+import { SchemaEvaluationView } from "@/components/SchemaEvaluationView";
 import { KnowledgeGraph as KnowledgeGraphType } from "@/utils/requests";
 import { EvaluateSchemaPromptResponse } from "@/utils/requests";
 import { ResponseSettingsModal } from "@/components/ResponseSettingsModal";
@@ -84,6 +86,39 @@ export function ResponseModal({
             hasData: jsonData && JSON.stringify(jsonData) !== "{}",
         },
     ];
+
+    // Render the appropriate content based on active tab
+    const renderContent = () => {
+        if (enabledTabs.length === 0) {
+            return (
+                <div className="flex justify-center items-center h-full text-gray-500">
+                    <p>No features enabled. Configure settings to view results.</p>
+                </div>
+            );
+        }
+
+        return (
+            <div className="mx-auto w-full max-w-4xl">
+                {activeTab === "json" && settings.enableJsonExtraction && (
+                    <div className="rounded-md overflow-hidden border border-[#30363d] bg-[#0d1117]">
+                        <JsonView jsonData={JSON.stringify(jsonData, null, 2)} evaluation={evaluation} />
+                    </div>
+                )}
+
+                {activeTab === "evaluation" && settings.enableSchemaEvaluation && (
+                    <div className="p-4 mx-4">
+                        <SchemaEvaluationView evaluation={evaluation} />
+                    </div>
+                )}
+
+                {activeTab === "knowledgeGraph" && settings.enableKnowledgeGraph && (
+                    <div className="rounded-md overflow-hidden border border-[#30363d] bg-[#0d1117]">
+                        <KnowledgeGraphView knowledgeGraph={graph} evaluation={evaluation} />
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <>
@@ -181,12 +216,7 @@ export function ResponseModal({
                                 </div>
                             ) : (
                                 <div className="overflow-y-auto p-6 h-full">
-                                    <Viewer
-                                        jsonData={JSON.stringify(jsonData, null, 2)}
-                                        evaluation={evaluation}
-                                        knowledgeGraph={graph}
-                                        settings={settings}
-                                    />
+                                    {renderContent()}
                                 </div>
                             )}
                         </div>
