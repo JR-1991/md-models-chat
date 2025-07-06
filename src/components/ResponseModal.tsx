@@ -27,9 +27,10 @@ interface ResponseModalProps {
         enableKnowledgeGraph: boolean;
         enableJsonExtraction: boolean;
         enableMultipleOutputs: boolean;
+        selectedModel?: string;
     };
     onDownload: () => void;
-    onSettingsChange: (key: string, value: boolean) => void;
+    onSettingsChange: (key: string, value: boolean | string) => void;
 }
 
 type TabType = "evaluation" | "knowledgeGraph" | "json";

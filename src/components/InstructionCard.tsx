@@ -21,8 +21,9 @@ interface InstructionCardProps {
         enableKnowledgeGraph: boolean;
         enableJsonExtraction: boolean;
         enableMultipleOutputs: boolean;
+        selectedModel?: string;
     };
-    onSettingsChange: (key: string, value: boolean) => void;
+    onSettingsChange: (key: string, value: boolean | string) => void;
 }
 
 export function InstructionCard({
@@ -31,7 +32,7 @@ export function InstructionCard({
     onExtract,
     isLoading,
     settings,
-    onSettingsChange
+    onSettingsChange,
 }: InstructionCardProps) {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -42,7 +43,7 @@ export function InstructionCard({
     return (
         <>
             <Card className="shadow-lg bg-[#161b22] border-gray-700 h-full flex flex-col">
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-row justify-between items-center">
                     <CardTitle className="flex items-center text-2xl font-semibold text-gray-100">
                         Text Input
                         <Tooltip>
@@ -70,7 +71,7 @@ export function InstructionCard({
                         </TooltipContent>
                     </Tooltip>
                 </CardHeader>
-                <CardContent className="space-y-4 flex-1 flex flex-col">
+                <CardContent className="flex flex-col flex-1 space-y-4">
                     <Textarea
                         value={text}
                         onChange={(e) => onChange(e.target.value)}

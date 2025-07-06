@@ -80,6 +80,7 @@ export default function Dashboard() {
       enableKnowledgeGraph: true,
       enableJsonExtraction: true,
       enableMultipleOutputs: false,
+      selectedModel: "",
     };
   });
 
@@ -166,17 +167,18 @@ export default function Dashboard() {
         let fileReferences: OpenAIFileReference[] = [];
         if (uploadedFiles.length > 0) {
           console.log(`Uploading ${uploadedFiles.length} files to OpenAI...`);
-          fileReferences = await uploadFilesToOpenAI(uploadedFiles, openAIKey);
+          fileReferences = await uploadFilesToOpenAI(uploadedFiles);
           console.log(`Successfully uploaded files, received ${fileReferences.length} file references`);
           console.log(fileReferences);
         }
 
         // Step 2: Run operations based on settings
         const operations = [];
+        const selectedModelForApi = responseSettings.selectedModel;
 
         if (responseSettings.enableSchemaEvaluation) {
           operations.push(
-            evaluateSchemaPrompt(mainText, schema, openAIKey, "", fileReferences)
+            evaluateSchemaPrompt(mainText, schema, "", fileReferences, selectedModelForApi)
           );
         } else {
           operations.push(Promise.resolve({ fits: false, reason: "" } as EvaluateSchemaPromptResponse));
@@ -184,7 +186,7 @@ export default function Dashboard() {
 
         if (responseSettings.enableKnowledgeGraph) {
           operations.push(
-            createKnowledgeGraph(mainText, "", openAIKey, fileReferences)
+            createKnowledgeGraph(mainText, "", fileReferences, selectedModelForApi)
           );
         } else {
           operations.push(Promise.resolve({ triplets: [] } as KnowledgeGraphType));
@@ -192,7 +194,7 @@ export default function Dashboard() {
 
         if (responseSettings.enableJsonExtraction) {
           operations.push(
-            extractToSchema(mainText, schema, openAIKey, responseSettings.enableMultipleOutputs, "", fileReferences)
+            extractToSchema(mainText, schema, responseSettings.enableMultipleOutputs, "", fileReferences, selectedModelForApi)
           );
         } else {
           operations.push(Promise.resolve({}));
@@ -221,7 +223,7 @@ export default function Dashboard() {
     setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
   };
 
-  const handleResponseSettingsChange = (key: string, value: boolean) => {
+  const handleResponseSettingsChange = (key: string, value: boolean | string) => {
     setResponseSettings((prev: typeof responseSettings) => ({ ...prev, [key]: value }));
   };
 

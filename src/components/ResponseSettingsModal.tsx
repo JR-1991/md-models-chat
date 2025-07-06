@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { X, Settings2 } from "lucide-react";
+import { ModelSelector } from "./ModelSelector";
 
 interface ResponseSettingsModalProps {
     isOpen: boolean;
@@ -12,8 +13,9 @@ interface ResponseSettingsModalProps {
         enableKnowledgeGraph: boolean;
         enableJsonExtraction: boolean;
         enableMultipleOutputs: boolean;
+        selectedModel?: string;
     };
-    onSettingsChange: (key: string, value: boolean) => void;
+    onSettingsChange: (key: string, value: boolean | string) => void;
 }
 
 export function ResponseSettingsModal({
@@ -49,6 +51,17 @@ export function ResponseSettingsModal({
                     </Button>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                    {/* Model Selection */}
+                    <div className="space-y-2">
+                        <ModelSelector
+                            selectedModel={settings.selectedModel}
+                            onModelSelect={(modelId) => onSettingsChange('selectedModel', modelId)}
+                        />
+                        <p className="text-xs text-gray-400">
+                            Select the AI model to use for processing your requests. Different models may have varying capabilities and performance characteristics.
+                        </p>
+                    </div>
+
                     {/* JSON Extraction */}
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
