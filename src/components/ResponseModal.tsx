@@ -6,7 +6,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Download, X, Settings2, FileText, Brain, CheckCircle } from "lucide-react";
-import { Spinner } from "@/components/Spinner";
+import { Spinner } from "@/components/SpinnerElement";
 import { JsonView } from "@/components/JsonView";
 import { KnowledgeGraphView } from "@/components/KnowledgeGraphView";
 import { SchemaEvaluationView } from "@/components/SchemaEvaluationView";

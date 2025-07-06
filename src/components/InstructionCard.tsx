@@ -7,7 +7,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { HelpCircle, Play, Settings2 } from "lucide-react";
-import { Spinner } from "@/components/Spinner";
+import { Spinner } from "@/components/SpinnerElement";
 import { ResponseSettingsModal } from "@/components/ResponseSettingsModal";
 import { useState } from "react";
 

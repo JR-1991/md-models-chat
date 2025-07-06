@@ -2,7 +2,7 @@
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 // @ts-ignore
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Spinner } from "@/components/Spinner";
+import { Spinner } from "@/components/SpinnerElement";
 
 interface JsonViewProps {
     jsonData: string;

@@ -1,6 +1,6 @@
 // Export all components from a central index file
-export { Spinner } from './Spinner';
-export { default as FitBadge } from './FitBadge';
+export { Spinner } from './SpinnerElement';
+export { default as FitBadge } from './Badge';
 export { FileInputCard } from './FileInputCard';
 export { InstructionCard } from './InstructionCard';
 export { JsonView } from './JsonView';

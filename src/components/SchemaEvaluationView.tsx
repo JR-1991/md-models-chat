@@ -1,5 +1,5 @@
 import ReactMarkdown from "react-markdown";
-import FitBadge from "@/components/FitBadge";
+import FitBadge from "@/components/Badge";
 import { Badge } from "./ui/badge";
 
 interface SchemaEvaluationViewProps {

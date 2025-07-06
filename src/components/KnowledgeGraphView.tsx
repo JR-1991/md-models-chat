@@ -1,5 +1,5 @@
 import { KnowledgeGraph } from "@/components/KnowledgeGraph";
-import { Spinner } from "@/components/Spinner";
+import { Spinner } from "@/components/SpinnerElement";
 import { KnowledgeGraph as KnowledgeGraphType } from "@/utils/requests";
 
 interface KnowledgeGraphViewProps {
