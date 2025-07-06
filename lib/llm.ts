@@ -43,18 +43,21 @@ export interface UploadedFileInfo {
   size: number;
 }
 
-const LLM_MODEL = process.env.LLM_MODEL ?? "gpt-4o";
+const DEFAULT_LLM_MODEL = process.env.LLM_MODEL ?? "gpt-4o";
 const DEFAULT_EXTRACT_PROMPT = `You are tasked to extract data from a given text, PDF or image. If something is not supplied directly, leave it empty. Work precisely and do not hallucinate. The following are instructitions that have to be followed strictly: `;
 
 /**
  * Extracts data from a given text based on a specified schema and knowledge graph.
  *
  * @param {string} schema - The JSON schema to validate against.
- * @param {z.infer<typeof KnowledgeGraphSchema>} graph - The knowledge graph containing triplets.
+ * @param {string} text - The text to extract data from.
  * @param {string} apiKey - The API key for authentication.
  * @param {boolean} multipleOutputs - Flag indicating if multiple outputs are expected.
+ * @param {string} _systemPrompt - System prompt (currently unused).
+ * @param {OpenAIFileReference[]} fileReferences - Array of file references.
+ * @param {string} model - The model to use for extraction.
  * @returns {Promise<any>} - The extracted data that fits the schema.
- * @throws {Error} - Throws an error if the graph structure is invalid.
+ * @throws {Error} - Throws an error if the extraction fails.
  */
 export default async function extractToSchema(
   schema: string,
@@ -62,9 +65,11 @@ export default async function extractToSchema(
   apiKey: string,
   multipleOutputs: boolean,
   _systemPrompt: string,
-  fileReferences: OpenAIFileReference[] = []
+  fileReferences: OpenAIFileReference[] = [],
+  model?: string
 ) {
   const client = setupClient(apiKey);
+  const modelToUse = model || DEFAULT_LLM_MODEL;
   let schema_obj = JSON.parse(schema);
 
   if (multipleOutputs) {
@@ -104,7 +109,7 @@ export default async function extractToSchema(
     ],
     instructions: `${DEFAULT_EXTRACT_PROMPT}\n\n${text}`,
     tools: [{ type: "web_search_preview" }],
-    model: LLM_MODEL,
+    model: modelToUse,
     // temperature: 0.0,
     text: {
       format: {
@@ -126,6 +131,8 @@ export default async function extractToSchema(
  * @param {string} schema - The JSON schema to validate against.
  * @param {string} apiKey - The API key for authentication.
  * @param {string} systemPrompt - The system prompt for evaluation.
+ * @param {OpenAIFileReference[]} fileReferences - Array of file references.
+ * @param {string} model - The model to use for evaluation.
  * @returns {Promise<ExtractionEvaluation>} - An object indicating if the text fits the schema and the reason.
  */
 export async function evaluateSchemaPrompt(
@@ -133,9 +140,11 @@ export async function evaluateSchemaPrompt(
   schema: string,
   apiKey: string,
   systemPrompt: string,
-  fileReferences: OpenAIFileReference[] = []
+  fileReferences: OpenAIFileReference[] = [],
+  model?: string
 ): Promise<ExtractionEvaluation> {
   const client = setupClient(apiKey);
+  const modelToUse = model || DEFAULT_LLM_MODEL;
 
   let content: (ResponseInputFile | ResponseInputImage | ResponseInputText)[];
 
@@ -150,7 +159,7 @@ export async function evaluateSchemaPrompt(
     ],
     instructions: `${systemPrompt}\n\n${EVALUATION_PROMPT}\n\nSchema:\n${schema}`,
     tools: [{ type: "web_search_preview" }],
-    model: LLM_MODEL,
+    model: modelToUse,
     // temperature: 0.0,
   });
 
@@ -169,17 +178,19 @@ export async function evaluateSchemaPrompt(
  * Creates a knowledge graph based on a prompt and pre-prompt.
  *
  * @param {string} prompt - The main prompt for generating the knowledge graph.
- * @param {string} pre_prompt - Additional context for the generation.
  * @param {string} apiKey - The API key for authentication.
+ * @param {OpenAIFileReference[]} fileReferences - Array of file references.
+ * @param {string} model - The model to use for knowledge graph generation.
  * @returns {Promise<typeof KnowledgeGraphSchema>} - The generated knowledge graph.
  */
 export async function createKnowledgeGraph(
   prompt: string,
-  pre_prompt: string,
   apiKey: string,
-  fileReferences: OpenAIFileReference[] = []
+  fileReferences: OpenAIFileReference[] = [],
+  model?: string
 ): Promise<typeof KnowledgeGraphSchema> {
   const client = setupClient(apiKey);
+  const modelToUse = model || DEFAULT_LLM_MODEL;
   const schema = zodToJsonSchema(KnowledgeGraphSchema, { target: "openAi" });
 
   let content: (ResponseInputFile | ResponseInputImage | ResponseInputText)[];
@@ -193,9 +204,9 @@ export async function createKnowledgeGraph(
         content: content,
       }
     ],
-    instructions: `${pre_prompt}\n\n${KNOWLEDGE_GRAPH_PROMPT}`,
+    instructions: `${KNOWLEDGE_GRAPH_PROMPT}\n\n${prompt}`,
     tools: [{ type: "web_search_preview" }],
-    model: LLM_MODEL,
+    model: modelToUse,
     // temperature: 0.0,
     text: {
       format: {
@@ -393,4 +404,16 @@ async function uploadFileToOpenAI(
   });
 
   return { file: openaiFile, input_type };
+}
+
+/**
+ * Lists all available models from the OpenAI API.
+ *
+ * @param {string} apiKey - The API key for authentication.
+ * @returns {Promise<OpenAI.Models.Model[]>} - Array of available model objects.
+ */
+export async function listAvailableModels(apiKey: string) {
+  const client = setupClient(apiKey);
+  const models = await client.models.list();
+  return models;
 }
