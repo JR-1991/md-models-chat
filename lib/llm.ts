@@ -74,7 +74,6 @@ export default async function extractToSchema(
 
   if (multipleOutputs) {
     let parsedSchema = JSON.parse(schema);
-    console.log("parsedSchema", schema);
 
     // Extract definitions from the schema
     let definitions = parsedSchema["$defs"];
@@ -313,26 +312,19 @@ export async function uploadFilesToOpenAI(formData: FormData): Promise<UploadedF
 
   // Convert FormData entries to array for better edge runtime compatibility
   const entries = Array.from(formData.entries());
-  console.log(`Processing ${entries.length} FormData entries:`, entries.map(([key, value]) => ({ key, type: typeof value, isFile: value instanceof File })));
 
   for (const [key, value] of entries) {
-    // log the type of the file (JS Type, seems like to not be of File)
-    console.log("value", value, "type:", typeof value, "constructor:", value.constructor.name);
-
     // Use a more robust file detection method that works in edge runtimes
     if (key.startsWith('file_') && isFileObject(value)) {
-      console.log(`Processing file: ${key}, name: ${value.name}, size: ${value.size}`);
       const fileUploadPromise = processFileUpload(client, value, key);
       fileUploads.push(fileUploadPromise);
     }
 
   }
 
-  console.log(`Found ${fileUploads.length} files to upload`);
   const results = await Promise.all(fileUploads);
   uploadedFiles.push(...results);
 
-  console.log(`Upload completed. Returning ${uploadedFiles.length} files`);
   return uploadedFiles;
 }
 

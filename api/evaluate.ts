@@ -45,7 +45,6 @@ export async function POST(request: Request): Promise<Response> {
 
     // Use file references if provided
     const fileRefs = file_references || [];
-    console.log("fileRefs", fileRefs);
 
     const res = await evaluateSchemaPrompt(
       text,

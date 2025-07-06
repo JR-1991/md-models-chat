@@ -166,10 +166,7 @@ export default function Dashboard() {
         // Step 1: Upload files to OpenAI if any
         let fileReferences: OpenAIFileReference[] = [];
         if (uploadedFiles.length > 0) {
-          console.log(`Uploading ${uploadedFiles.length} files to OpenAI...`);
           fileReferences = await uploadFilesToOpenAI(uploadedFiles);
-          console.log(`Successfully uploaded files, received ${fileReferences.length} file references`);
-          console.log(fileReferences);
         }
 
         // Step 2: Run operations based on settings
