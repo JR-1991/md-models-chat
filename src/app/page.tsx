@@ -237,6 +237,15 @@ export default function Dashboard() {
     linkElement.click();
   };
 
+  const handleModalClose = () => {
+    setIsResponseModalOpen(false);
+    // Clear response data when modal is closed
+    setJsonData({});
+    setEvaluation({ fits: false, reason: "" });
+    setGraph({ triplets: [] });
+    setIsEvaluating(false);
+  };
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-[#0d1117] text-white">
@@ -314,7 +323,7 @@ export default function Dashboard() {
 
         <ResponseModal
           isOpen={isResponseModalOpen}
-          onClose={() => setIsResponseModalOpen(false)}
+          onClose={handleModalClose}
           isEvaluating={isEvaluating}
           jsonData={jsonData}
           evaluation={evaluation}
